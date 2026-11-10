@@ -1,76 +1,124 @@
 /*
- * CampusOne demo authentication.
+ * CampusOne authentication (Supabase).
  *
- * FRONT-END ONLY. Accounts and passwords live in this file and sessions live in the
- * browser, so anyone can read them or fake a session. This is fine for a prototype
- * on GitHub Pages, NOT for real student data. Before real use, replace Auth.login()
- * with a call to a real backend (e.g. Firebase Auth, Supabase, or the college's SSO)
- * and enforce roles on the server.
+ * Load order in <head>: supabase-js (CDN) -> config.js -> auth.js (not deferred).
+ * Each page declares who may open it with <html data-role="student|faculty|admin|guest|recovery">.
+ * The page stays hidden until the check passes; otherwise the visitor is redirected.
  *
- * Each page declares who may see it with <html data-role="student|faculty|admin|guest">.
- * Load this script in <head> (not deferred) so redirects happen before the page shows.
+ * Roles live in the `profiles` table and are enforced by the database's row-level
+ * security, so editing this file in the browser cannot grant access to anyone's data.
+ *
+ * Exposes window.Auth:
+ *   Auth.client         Supabase client (null if not configured)
+ *   Auth.ready          Promise -> {user, profile} on protected pages
+ *   Auth.signIn(...)    Auth.signOut(msg)    Auth.resetPassword(email)
  */
 (function(){
-  const USERS = [
-    {role:"student", id:"0103CS241001", password:"student123", name:"Sarthak Gupta", first:"Sarthak", initials:"SG", meta:"B.Tech CSE · Semester 1 · Section A"},
-    {role:"faculty", id:"FAC1024", password:"faculty123", name:"Prof. Neha Verma", first:"Prof. Verma", initials:"NV", meta:"Dept. of Mathematics · Assistant Professor"},
-    {role:"admin", id:"admin", password:"admin123", name:"Campus Admin", first:"Admin", initials:"CA", meta:"Administration · Full access"}
-  ];
+  const cfg = window.CAMPUSONE_CONFIG || {};
+  const libLoaded = !!(window.supabase && window.supabase.createClient);
+  const configured = !!(cfg.supabaseUrl && cfg.supabaseAnonKey && libLoaded);
+
   const ROLES = {
-    student:{label:"Student", home:"index.html", idLabel:"Enrollment number", placeholder:"e.g. 0103CS241001"},
-    faculty:{label:"Faculty", home:"faculty.html", idLabel:"Employee ID", placeholder:"e.g. FAC1024"},
-    admin:{label:"Admin", home:"admin.html", idLabel:"Admin username", placeholder:"e.g. admin"}
+    student: {label:"Student", home:"index.html"},
+    faculty: {label:"Faculty", home:"faculty.html"},
+    admin:   {label:"Admin",   home:"admin.html"}
   };
-  const KEY = "campusone.session";
-  const LOCK_KEY = "campusone.attempts";
-  const SHORT = 8*60*60*1000, LONG = 7*24*60*60*1000;
-  const MAX_ATTEMPTS = 5, LOCK_MS = 30*1000;
+  const REMEMBER = "campusone.remember";
+  const FLASH = "campusone.flash";
+  const safe = fn => { try { return fn(); } catch(e) { return null; } };
 
-  const store = {
-    get(k){ try{ return JSON.parse(sessionStorage.getItem(k) || localStorage.getItem(k)); }catch(e){ return null; } },
-    set(k,v,persist){ try{ (persist?localStorage:sessionStorage).setItem(k,JSON.stringify(v)); }catch(e){} },
-    del(k){ try{ sessionStorage.removeItem(k); localStorage.removeItem(k); }catch(e){} }
+  // "Keep me signed in" off -> keep the session only for this browser tab.
+  const storage = {
+    getItem: k => safe(() => sessionStorage.getItem(k) ?? localStorage.getItem(k)),
+    setItem: (k, v) => safe(() => {
+      const persist = localStorage.getItem(REMEMBER) !== "0";
+      (persist ? localStorage : sessionStorage).setItem(k, v);
+      (persist ? sessionStorage : localStorage).removeItem(k);
+    }),
+    removeItem: k => safe(() => { sessionStorage.removeItem(k); localStorage.removeItem(k); })
   };
 
-  function session(){
-    const s = store.get(KEY);
-    if(!s || !ROLES[s.role] || Date.now() > s.expires){ if(s) store.del(KEY); return null; }
-    return s;
+  const client = configured ? window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+    auth: {storage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true}
+  }) : null;
+
+  async function loadProfile(userId){
+    const {data, error} = await client.from("profiles").select("*").eq("id", userId).maybeSingle();
+    if(error) throw error;
+    return data;
   }
 
-  function attempts(){ return store.get(LOCK_KEY) || {count:0, until:0}; }
-
   const Auth = {
-    ROLES,
-    demo: USERS.reduce((m,u)=>(m[u.role]={id:u.id,password:u.password},m),{}),
-    session,
-    homeFor(role){ return (ROLES[role]||ROLES.student).home; },
-    lockedFor(){ return Math.max(0, attempts().until - Date.now()); },
-    login(role, id, password, remember){
-      const wait = Auth.lockedFor();
-      if(wait) return {ok:false, error:`Too many attempts. Try again in ${Math.ceil(wait/1000)} seconds.`};
-      const user = USERS.find(u => u.role===role && u.id.toLowerCase()===String(id).trim().toLowerCase() && u.password===password);
-      if(!user){
-        const a = attempts(); a.count++;
-        if(a.count >= MAX_ATTEMPTS){ a.count = 0; a.until = Date.now()+LOCK_MS; }
-        store.set(LOCK_KEY, a);
-        return {ok:false, error: a.until > Date.now() ? "Too many attempts. Try again in 30 seconds." : `Incorrect ${ROLES[role].idLabel.toLowerCase()} or password.`};
+    ROLES, client, configured, libLoaded,
+    homeFor: role => (ROLES[role] || ROLES.student).home,
+    flash: msg => safe(() => sessionStorage.setItem(FLASH, msg)),
+    takeFlash: () => safe(() => { const m = sessionStorage.getItem(FLASH); sessionStorage.removeItem(FLASH); return m; }),
+
+    async signIn(role, email, password, remember){
+      safe(() => localStorage.setItem(REMEMBER, remember ? "1" : "0"));
+      const {data, error} = await client.auth.signInWithPassword({email: email.trim(), password});
+      if(error){
+        const msg = /invalid login credentials/i.test(error.message) ? "Incorrect email or password."
+                  : /email not confirmed/i.test(error.message) ? "This email hasn't been confirmed yet. Ask an admin to confirm your account."
+                  : error.message;
+        return {ok:false, error:msg};
       }
-      store.del(LOCK_KEY);
-      const {password:_, ...pub} = user;
-      store.del(KEY);
-      store.set(KEY, {...pub, expires: Date.now() + (remember?LONG:SHORT)}, remember);
-      return {ok:true, user:pub};
+      let profile = null;
+      try { profile = await loadProfile(data.user.id); } catch(e) { /* handled below */ }
+      if(!profile){ await client.auth.signOut(); return {ok:false, error:"Your account has no CampusOne profile yet. Ask an admin to set it up."}; }
+      if(profile.status !== "active"){ await client.auth.signOut(); return {ok:false, error:"Your account is waiting for admin approval."}; }
+      if(profile.role !== role){
+        await client.auth.signOut();
+        const real = ROLES[profile.role].label;
+        return {ok:false, error:`This is a ${real.toLowerCase()} account. Choose "${real}" above and try again.`};
+      }
+      return {ok:true, profile};
     },
-    logout(){ store.del(KEY); location.replace("login.html"); }
+
+    async signOut(msg){
+      if(msg) Auth.flash(msg);
+      try { await client?.auth.signOut(); } catch(e) {}
+      storage.removeItem(REMEMBER);
+      location.replace("login.html");
+    },
+
+    resetPassword: email => client.auth.resetPasswordForEmail(email.trim(), {redirectTo: new URL("reset.html", location.href).href})
   };
   window.Auth = Auth;
 
-  /* Route guard */
+  /* ---------- Route guard ---------- */
   const need = document.documentElement.dataset.role;
-  const s = session();
-  let target = null;
-  if(need === "guest"){ if(s) target = Auth.homeFor(s.role); }
-  else if(need){ if(!s) target = "login.html"; else if(s.role !== need) target = Auth.homeFor(s.role); }
-  if(target){ document.documentElement.style.visibility = "hidden"; location.replace(target); }
+  const root = document.documentElement;
+  root.classList.add("auth-pending");
+  const reveal = () => root.classList.remove("auth-pending");
+  const never = new Promise(() => {});
+  const go = url => { location.replace(url); return never; };
+
+  Auth.ready = (async () => {
+    if(need === "recovery" || (need === "guest" && !configured)){ reveal(); return {}; }
+    if(!configured) return go("login.html");
+
+    const {data:{session}} = await client.auth.getSession();
+    if(!session){ if(need === "guest"){ reveal(); return {}; } return go("login.html"); }
+
+    let profile;
+    try { profile = await loadProfile(session.user.id); }
+    catch(error){
+      // Couldn't reach Supabase: don't sign the user out, just show the page with an error.
+      if(need === "guest"){ reveal(); return {}; }
+      reveal(); return {user:session.user, profile:null, error};
+    }
+    if(!profile || profile.status !== "active"){
+      await client.auth.signOut();
+      if(need !== "guest") Auth.flash(profile ? "Your account is waiting for admin approval." : "Your account has no CampusOne profile yet.");
+      if(need === "guest"){ reveal(); return {}; }
+      return go("login.html");
+    }
+    if(need === "guest" || profile.role !== need) return go(Auth.homeFor(profile.role));
+
+    // Signed out elsewhere (another tab, or the session expired) -> back to login.
+    client.auth.onAuthStateChange(event => { if(event === "SIGNED_OUT") location.replace("login.html"); });
+    reveal();
+    return {user:session.user, profile};
+  })();
 })();

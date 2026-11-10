@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" data-role="recovery">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123c8c">
+  <title>Reset password · CampusOne</title>
+  <link rel="icon" href="./icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+  <script src="./config.js"></script>
+  <script src="./auth.js"></script>
+</head>
+<body class="login-page">
+  <script src="./icons.js"></script>
+  <main class="login reset">
+    <section class="login-brand">
+      <div class="login-brand-inner">
+        <div class="login-logo"><div class="brand-mark" aria-hidden="true">L<span>1</span></div><div><strong>LNCT CampusOne</strong><small>Your campus, one place</small></div></div>
+        <div class="login-pitch"><h1>Choose a new password.</h1><p>Use at least 8 characters. You'll sign in again afterwards.</p></div>
+      </div>
+    </section>
+    <section class="login-panel">
+      <form class="login-card" id="resetForm" novalidate>
+        <h2>Reset password</h2>
+        <p class="login-sub" id="resetSub">Checking your reset link…</p>
+        <div id="resetFields" hidden>
+          <div class="field">
+            <label for="newPw">New password</label>
+            <div class="input-wrap"><svg class="i"><use href="#i-lock"/></svg><input id="newPw" type="password" autocomplete="new-password" minlength="8" required></div>
+          </div>
+          <div class="field">
+            <label for="confirmPw">Confirm new password</label>
+            <div class="input-wrap"><svg class="i"><use href="#i-lock"/></svg><input id="confirmPw" type="password" autocomplete="new-password" minlength="8" required></div>
+          </div>
+          <p class="form-error" id="formError" role="alert" hidden><svg class="i"><use href="#i-alert"/></svg><span></span></p>
+          <button class="primary-btn block" type="submit" id="submitBtn"><span>Update password</span><svg class="i"><use href="#i-arrow"/></svg></button>
+        </div>
+        <p class="login-foot"><a href="./login.html">Back to sign in</a></p>
+      </form>
+    </section>
+  </main>
+  <script src="./reset.js" defer></script>
+</body>
+</html>
