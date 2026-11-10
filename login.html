@@ -13,6 +13,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+  <script src="./config.js"></script>
   <script src="./auth.js"></script>
 </head>
 <body class="login-page">
@@ -30,7 +32,7 @@
             <li><span class="tone-amber"><svg class="i"><use href="#i-shield"/></svg></span><div><strong>Admin</strong><small>Manage users, departments and campus updates</small></div></li>
           </ul>
         </div>
-        <small class="login-note">Prototype · sample data only</small>
+        <small class="login-note">Secured by Supabase · role-based access</small>
       </div>
     </section>
 
@@ -47,8 +49,8 @@
         </fieldset>
 
         <div class="field">
-          <label for="userId" id="idLabel">Enrollment number</label>
-          <div class="input-wrap"><svg class="i"><use href="#i-user"/></svg><input id="userId" name="username" autocomplete="username" autocapitalize="characters" spellcheck="false" required placeholder="e.g. 0103CS241001"></div>
+          <label for="userId">College email</label>
+          <div class="input-wrap"><svg class="i"><use href="#i-user"/></svg><input id="userId" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required placeholder="you@lnct.ac.in"></div>
         </div>
         <div class="field">
           <label for="password">Password</label>
@@ -65,12 +67,13 @@
 
         <button class="primary-btn block" type="submit" id="submitBtn"><span>Sign in</span><svg class="i"><use href="#i-arrow"/></svg></button>
 
-        <div class="demo-creds">
-          <div><strong>Demo <span id="demoRole">student</span> account</strong><small><code id="demoId"></code> · <code id="demoPw"></code></small></div>
-          <button type="button" class="text-button" id="useDemo">Fill in</button>
+        <p class="form-note" id="formNote" role="status" hidden><svg class="i"><use href="#i-check"/></svg><span></span></p>
+
+        <div class="demo-creds setup-warning" id="setupWarning" hidden>
+          <div><strong>Backend not connected</strong><small>Add your Supabase Project URL and anon key to <code>config.js</code>. See <code>supabase/SETUP.md</code>.</small></div>
         </div>
       </form>
-      <p class="login-foot">Not connected to LNCT systems. For demonstration only.</p>
+      <p class="login-foot">Accounts are created by your college administrator.</p>
     </section>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

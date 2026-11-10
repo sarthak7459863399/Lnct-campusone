@@ -1,32 +1,33 @@
 # LNCT CampusOne
 
-A mobile-first, installable **prototype** for a college campus app with separate dashboards for students, faculty and admins.
+A mobile-first, installable campus app with separate dashboards for students, faculty and admins. The website is static (GitHub Pages) and uses **Supabase** for sign-in, the database and access rules.
 
-## Demo sign-in
-Opening the site takes you to `login.html`. Pick a role and use its demo account (the login page has a **Fill in** button):
+## Setup
+Follow [`supabase/SETUP.md`](supabase/SETUP.md): run `schema.sql`, create the first accounts, run `seed.sql`, then put your Project URL and anon key in `config.js`.
 
-| Role    | ID / username   | Password     | Lands on       |
-|---------|-----------------|--------------|----------------|
-| Student | `0103CS241001`  | `student123` | `index.html`   |
-| Faculty | `FAC1024`       | `faculty123` | `faculty.html` |
-| Admin   | `admin`         | `admin123`   | `admin.html`   |
-
-Each page only opens for its own role; anyone else is sent to their own dashboard or back to the login page. Sign out from the avatar menu (top right) or the **Profile** tab.
-
-> **Not real security.** Accounts live in `auth.js` and sessions in the browser, so anyone can read or bypass them. Before real use, replace `Auth.login()` with a real backend (for example Firebase Auth, Supabase or the college's SSO) and check roles on the server.
+## How sign-in works
+- Everyone signs in with their email and password on `login.html` after choosing their role. Students go to `index.html`, faculty to `faculty.html`, admins to `admin.html`.
+- Roles are stored in the `profiles` table. Accounts are created by an admin and start as **pending** until approved in the admin console.
+- What each role can read or change is enforced by Supabase row-level security (see `supabase/schema.sql`), so changing the website code in a browser can't unlock other people's data.
+- "Forgot password?" emails a reset link that opens `reset.html`.
 
 ## Files
+- `supabase/schema.sql` — tables, security rules and database functions
+- `supabase/seed.sql` — first accounts' roles plus sample timetable, notices, assignments and attendance
+- `supabase/SETUP.md` — step-by-step setup
+- `config.js` — your Supabase Project URL and anon key
+- `auth.js` — Supabase client, sign-in/out and the per-page role guard
 - `login.html`, `login.js` — role-based sign-in page
-- `auth.js` — demo accounts, session handling and page access guard
-- `index.html` — student dashboard
-- `faculty.html`, `faculty.js` — faculty dashboard (attendance marking, submissions, notices)
-- `admin.html`, `admin.js` — admin console (user approvals, notices, activity)
+- `reset.html`, `reset.js` — set a new password from the reset email
+- `index.html`, `student.js` — student dashboard (timetable, attendance, notices, assignments)
+- `faculty.html`, `faculty.js` — faculty dashboard (attendance marking, assignments, notices)
+- `admin.html`, `admin.js` — admin console (approvals, roles, notices, activity log)
 - `timetable.js` — live timetable used by the student and faculty pages
+- `app.js` — shared header, account menu, helpers, navigation, install prompt
 - `icons.js` — shared SVG icons
 - `styles.css` — responsive mobile-first design with dark mode
-- `app.js` — shared header, account menu, navigation, install prompt
 - `manifest.webmanifest` — Progressive Web App settings
-- `sw.js` — service worker for offline app shell
+- `sw.js` — service worker that caches the app's own files (never Supabase data)
 - `icon-192.png`, `icon-512.png` — app icons
 
 ## Publish on GitHub Pages
@@ -42,4 +43,4 @@ Each page only opens for its own role; anyone else is sent to their own dashboar
 4. Confirm the prompt.
 
 ## Important
-This is a front-end demo only. All timetable, attendance, notices, profile and assignments are sample data. It is not connected to LNCT's official systems and does not store real attendance or login data. Replace demo data and add an authorized backend before real student use.
+Not connected to LNCT's official systems. The seed script adds sample data; replace it with real courses and timetables before real use.
