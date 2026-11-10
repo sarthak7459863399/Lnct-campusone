@@ -389,3 +389,9 @@ td.empty{display:table-cell}
 .dialog-actions{display:flex;justify-content:flex-end;gap:8px}
 @media (max-width:480px){.form-grid{grid-template-columns:1fr}}
 [hidden]{display:none!important}
+.btn-sm.danger{color:var(--red);border-color:color-mix(in srgb,var(--red) 35%,var(--line))}
+.btn-sm.danger:hover{background:color-mix(in srgb,var(--red) 8%,var(--surface))}
+.dialog-actions .spacer{flex:1}
+.static-field{display:flex;flex-direction:column;gap:6px;margin:0}
+.static-field span{font-size:12.5px;font-weight:600;color:var(--muted)}
+.static-field b{font-size:14px;font-weight:500;overflow-wrap:anywhere}

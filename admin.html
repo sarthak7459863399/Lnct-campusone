@@ -82,10 +82,10 @@
 
     <div class="col-main">
       <section class="panel" id="usersPanel">
-        <div class="section-head"><div><p class="eyebrow">PEOPLE</p><h2>User management</h2></div></div>
-        <p class="panel-sub">New people sign in after you add them in Supabase (Authentication → Users → Add user). They appear here as <b>Pending</b>: set their role and details, then approve.</p>
+        <div class="section-head"><div><p class="eyebrow">PEOPLE</p><h2>User management</h2></div><button type="button" class="btn-sm primary" id="addUserBtn"><span class="btn-inner"><svg class="i"><use href="#i-plus"/></svg>Add user</span></button></div>
+        <p class="panel-sub">Add students, faculty and admins here. They can sign in straight away with the email and password you set. Use <b>Edit</b> to change details, set a new password or delete an account.</p>
         <div class="toolbar">
-          <div class="input-wrap"><svg class="i"><use href="#i-search"/></svg><label class="sr-only" for="userSearch">Search users</label><input id="userSearch" type="search" placeholder="Search name, ID, department or section"></div>
+          <div class="input-wrap"><svg class="i"><use href="#i-search"/></svg><label class="sr-only" for="userSearch">Search users</label><input id="userSearch" type="search" placeholder="Search name, email, ID, department or section"></div>
           <div class="seg" role="group" aria-label="Filter by role">
             <button type="button" data-filter="all" aria-pressed="true">All</button>
             <button type="button" data-filter="student" aria-pressed="false">Students</button>
@@ -140,6 +140,8 @@
       <div class="dialog-head"><h2 id="dialogTitle">Edit user</h2><button type="button" class="icon-btn" id="dialogClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
       <div class="form-grid">
         <label class="span-2"><span>Full name</span><input class="text-input" name="full_name" required maxlength="120"></label>
+        <label class="span-2" data-mode="create"><span>Email</span><input class="text-input" name="email" type="email" maxlength="254" autocomplete="off" placeholder="name@lnct.ac.in"></label>
+        <p class="span-2 static-field" data-mode="edit"><span>Email</span><b id="dialogEmail">—</b></p>
         <label><span>Role</span><select name="role"><option value="student">Student</option><option value="faculty">Faculty</option><option value="admin">Admin</option></select></label>
         <label><span>Status</span><select name="status"><option value="active">Active</option><option value="pending">Pending</option></select></label>
         <label><span>Enrollment / employee ID</span><input class="text-input" name="member_id" maxlength="40"></label>
@@ -147,10 +149,11 @@
         <label data-for="student"><span>Section</span><input class="text-input" name="section" maxlength="20" placeholder="e.g. CSE-A"></label>
         <label data-for="student"><span>Program</span><input class="text-input" name="program" maxlength="80" placeholder="e.g. B.Tech CSE · Semester 1"></label>
         <label data-for="faculty" class="span-2"><span>Designation</span><input class="text-input" name="title" maxlength="80" placeholder="e.g. Assistant Professor"></label>
+        <label class="span-2"><span id="pwLabel">Password</span><input class="text-input" name="password" type="text" minlength="8" maxlength="72" autocomplete="new-password" placeholder="At least 8 characters"></label>
       </div>
       <datalist id="deptList"></datalist>
       <p class="form-error" id="dialogError" hidden><svg class="i"><use href="#i-alert"/></svg><span></span></p>
-      <div class="dialog-actions"><button type="button" class="btn-sm" id="dialogCancel">Cancel</button><button type="submit" class="btn-sm primary" id="dialogSave">Save changes</button></div>
+      <div class="dialog-actions"><button type="button" class="btn-sm danger" id="dialogDelete" data-mode="edit">Delete account</button><span class="spacer"></span><button type="button" class="btn-sm" id="dialogCancel">Cancel</button><button type="submit" class="btn-sm primary" id="dialogSave">Save changes</button></div>
     </form>
   </dialog>
 

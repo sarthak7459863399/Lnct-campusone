@@ -18,6 +18,7 @@ create table public.profiles (
   role        public.user_role   not null default 'student',
   status      public.user_status not null default 'pending',
   full_name   text not null default '',
+  email       text,                 -- copied from the login account
   member_id   text unique,          -- enrollment number (students) / employee ID (faculty)
   department  text,                 -- e.g. Computer Science
   program     text,                 -- students, e.g. B.Tech CSE · Semester 1
@@ -151,12 +152,22 @@ $$;
 create function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  insert into profiles (id, full_name)
-  values (new.id, coalesce(nullif(new.raw_user_meta_data ->> 'full_name', ''), split_part(new.email, '@', 1)));
+  insert into profiles (id, full_name, email)
+  values (new.id, coalesce(nullif(new.raw_user_meta_data ->> 'full_name', ''), split_part(new.email, '@', 1)), new.email);
   return new;
 end $$;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Keep the profile email in step if an email is changed in Supabase.
+create function public.handle_user_email_change() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  update profiles set email = new.email where id = new.id;
+  return new;
+end $$;
+create trigger on_auth_user_email_changed after update of email on auth.users
+  for each row execute function public.handle_user_email_change();
 
 -- Stamp the author's name on notices (so students can see who posted without reading profiles).
 create function public.notices_before_insert() returns trigger
@@ -181,9 +192,12 @@ end $$;
 create trigger notices_after_insert after insert on public.notices
   for each row execute function public.notices_after_insert();
 
+-- Only logs changes made by a signed-in admin; server-side changes (the admin-users
+-- function, the SQL Editor) write their own log entry.
 create function public.profiles_after_update() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
+  if auth.uid() is null then return null; end if;
   if new.status is distinct from old.status and new.status = 'active' then
     perform public.log_activity(format('approved %s (%s)', new.full_name, new.role));
   elsif new.role is distinct from old.role then

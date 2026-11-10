@@ -47,9 +47,9 @@
     const q = $("userSearch").value.trim().toLowerCase();
     const rows = users.filter(u =>
       (filter === "all" || (filter === "pending" ? u.status === "pending" : u.role === filter)) &&
-      (!q || [u.full_name, u.member_id, u.department, u.section].some(v => (v || "").toLowerCase().includes(q))));
+      (!q || [u.full_name, u.email, u.member_id, u.department, u.section].some(v => (v || "").toLowerCase().includes(q))));
     $("userRows").innerHTML = rows.map(u => `<tr>
-      <td><div class="who"><span class="mini-avatar tone-${ROLE_TONE[u.role]}">${U.initials(u.full_name)}</span><div><strong>${U.esc(u.full_name || "(no name)")}${u.id === me.id ? ' <small class="you">(you)</small>' : ""}</strong><small>${U.esc(u.member_id || "No ID yet")}</small></div></div></td>
+      <td><div class="who"><span class="mini-avatar tone-${ROLE_TONE[u.role]}">${U.initials(u.full_name)}</span><div><strong>${U.esc(u.full_name || "(no name)")}${u.id === me.id ? ' <small class="you">(you)</small>' : ""}</strong><small>${U.esc([u.email, u.member_id].filter(Boolean).join(" · ") || "No ID yet")}</small></div></div></td>
       <td><span class="chip tone-${ROLE_TONE[u.role]}">${ROLE_LABEL[u.role]}</span></td>
       <td>${U.esc([u.department, u.section].filter(Boolean).join(" · ") || "—")}</td>
       <td><span class="status ${u.status}">${u.status === "pending" ? "Pending" : "Active"}</span></td>
@@ -78,44 +78,107 @@
     }
   });
 
-  /* ---- Edit dialog ---- */
+  /* ---- Add / edit dialog ---- */
+  // Creating accounts, setting passwords and deleting accounts go through the
+  // admin-users Edge Function (it holds the service-role key; the browser never does).
+  async function callAdmin(body){
+    const {data, error} = await sb.functions.invoke("admin-users", {body});
+    if(!error) return data;
+    let msg = error.message;
+    try { const j = await error.context.json(); if(j?.error) msg = j.error; } catch(e) {}
+    if(error.name === "FunctionsFetchError" || error.context?.status === 404)
+      msg = "The admin-users function isn't deployed yet. See supabase/SETUP.md, step 8.";
+    throw new Error(msg);
+  }
+
   const dialog = $("userDialog"), form = $("userForm");
-  let editing = null;
+  let editing = null;   // null = creating a new user
   function syncRoleFields(){
     const role = form.role.value;
     form.querySelectorAll("[data-for]").forEach(el => el.hidden = el.dataset.for !== role);
   }
+  function setMode(mode){
+    form.querySelectorAll("[data-mode]").forEach(el => el.hidden = el.dataset.mode !== mode);
+    form.email.required = mode === "create";
+    form.password.required = mode === "create";
+    $("pwLabel").textContent = mode === "create" ? "Password" : "Set a new password (optional)";
+    form.password.placeholder = mode === "create" ? "At least 8 characters" : "Leave blank to keep the current one";
+  }
   function dialogError(msg){ $("dialogError").querySelector("span").textContent = msg || ""; $("dialogError").hidden = !msg; }
+  const FIELDS = ["full_name","role","status","member_id","department","section","program","title"];
+
+  function openCreator(){
+    editing = null; dialogError(""); form.reset(); setMode("create");
+    $("dialogTitle").textContent = "Add user";
+    $("dialogSave").textContent = "Create account";
+    form.role.value = filter === "faculty" || filter === "admin" ? filter : "student";
+    form.status.value = "active"; form.role.disabled = false; form.status.disabled = true;
+    syncRoleFields(); dialog.showModal(); form.full_name.focus();
+  }
   function openEditor(u, approving){
-    editing = u; dialogError("");
+    editing = u; dialogError(""); form.reset(); setMode("edit");
     $("dialogTitle").textContent = approving ? "Complete details to approve" : "Edit user";
-    for(const f of ["full_name","role","status","member_id","department","section","program","title"]) form[f].value = u[f] ?? "";
+    $("dialogSave").textContent = "Save changes";
+    $("dialogEmail").textContent = u.email || "—";
+    for(const f of FIELDS) form[f].value = u[f] ?? "";
     if(approving) form.status.value = "active";
     const self = u.id === me.id;
     form.role.disabled = form.status.disabled = self;   // don't lock yourself out
-    syncRoleFields();
-    dialog.showModal();
-    form.full_name.focus();
+    $("dialogDelete").hidden = self;
+    syncRoleFields(); dialog.showModal(); form.full_name.focus();
   }
+  $("addUserBtn").addEventListener("click", openCreator);
   form.role.addEventListener("change", syncRoleFields);
   $("dialogClose").addEventListener("click", () => dialog.close());
   $("dialogCancel").addEventListener("click", () => dialog.close());
+
   form.addEventListener("submit", async e => {
     e.preventDefault();
     const v = f => form[f].value.trim() || null;
-    const role = form.role.value;
+    const role = form.role.value, password = form.password.value;
     if(!v("full_name")) return dialogError("Enter a full name.");
-    if(role === "student" && form.status.value === "active" && !v("section")) return dialogError("Students need a section (e.g. CSE-A) to see their timetable.");
-    const update = {full_name:v("full_name"), member_id:v("member_id"), department:v("department"),
+    if(!editing && (!v("email") || !form.email.checkValidity())) return dialogError("Enter a valid email address.");
+    if((!editing || password) && password.length < 8) return dialogError("The password must be at least 8 characters.");
+    if(role === "student" && (!editing || form.status.value === "active") && !v("section")) return dialogError("Students need a section (e.g. CSE-A) to see their timetable.");
+    const details = {full_name:v("full_name"), member_id:v("member_id"), department:v("department"),
       section: role === "student" ? v("section") : null, program: role === "student" ? v("program") : null, title: role === "faculty" ? v("title") : null};
-    if(editing.id !== me.id){ update.role = role; update.status = form.status.value; }
-    $("dialogSave").disabled = true;
-    const {error} = await sb.from("profiles").update(update).eq("id", editing.id);
-    $("dialogSave").disabled = false;
-    if(error) return dialogError(/duplicate key/i.test(error.message) ? "That enrollment / employee ID is already used by someone else." : error.message);
-    dialog.close();
-    showToast(`Saved ${update.full_name}.`);
-    refresh();
+
+    $("dialogSave").disabled = true; dialogError("");
+    try {
+      if(!editing){
+        await callAdmin({action:"create", email:v("email"), password, role, ...details});
+        showToast(`Account created for ${details.full_name}. They can sign in now.`);
+      } else {
+        const update = {...details};
+        if(editing.id !== me.id){ update.role = role; update.status = form.status.value; }
+        const {error} = await sb.from("profiles").update(update).eq("id", editing.id);
+        if(error) throw new Error(/duplicate key/i.test(error.message) ? "That enrollment / employee ID is already used by someone else." : error.message);
+        if(password) await callAdmin({action:"set_password", id:editing.id, password});
+        showToast(password ? `Saved ${details.full_name} and set a new password.` : `Saved ${details.full_name}.`);
+      }
+      dialog.close();
+      refresh();
+    } catch(err) {
+      dialogError(err.message);
+    } finally {
+      $("dialogSave").disabled = false;
+    }
+  });
+
+  $("dialogDelete").addEventListener("click", async () => {
+    if(!editing || editing.id === me.id) return;
+    if(!confirm(`Delete ${editing.full_name}'s account? Their attendance, submissions and profile are removed too. This can't be undone.`)) return;
+    $("dialogDelete").disabled = true;
+    try {
+      await callAdmin({action:"delete", id:editing.id});
+      dialog.close();
+      showToast(`Deleted ${editing.full_name}.`);
+      refresh();
+    } catch(err) {
+      dialogError(err.message);
+    } finally {
+      $("dialogDelete").disabled = false;
+    }
   });
 
   /* ---- Notices ---- */
