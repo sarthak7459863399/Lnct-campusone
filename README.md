@@ -8,7 +8,7 @@ A mobile-first, installable **prototype** for a college student dashboard.
 - `app.js` — navigation, demo interactions, install prompt
 - `manifest.webmanifest` — Progressive Web App settings
 - `sw.js` — service worker for offline app shell
-- `icons/` — app icons
+- `icon-192.png`, `icon-512.png` — app icons
 
 ## Publish on GitHub Pages
 1. Upload the contents of this folder to the **root** of your repository (not the ZIP itself).
