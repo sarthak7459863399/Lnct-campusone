@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-role="student">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,60 +7,134 @@
   <meta name="description" content="LNCT CampusOne student campus companion prototype">
   <title>LNCT CampusOne</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="./styles.css">
+  <script src="./auth.js"></script>
 </head>
 <body>
+  <script src="./icons.js"></script>
+
   <header class="topbar">
-    <div class="brand-mark">L<span>1</span></div>
-    <div class="brand-copy"><strong>LNCT CampusOne</strong><small>Your campus, one place</small></div>
-    <button class="avatar" id="profileBtn" aria-label="Open profile">SG</button>
+    <div class="topbar-inner">
+      <div class="brand-mark" aria-hidden="true">L<span>1</span></div>
+      <div class="brand-copy"><strong>LNCT CampusOne</strong><small>Your campus, one place</small></div>
+      <button class="icon-btn" id="bellBtn" aria-label="Notifications, 3 new"><svg class="i"><use href="#i-bell"/></svg><span class="dot"></span></button>
+      <div class="profile">
+        <button class="avatar" id="profileBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="profileMenu" aria-label="Account menu"><span data-user="initials">SG</span></button>
+        <div class="profile-menu" id="profileMenu" role="menu" hidden>
+          <div class="profile-head"><span class="avatar sm" data-user="initials"></span><div><strong data-user="name"></strong><small data-user="id"></small></div></div>
+          <p class="profile-meta"><span class="chip tone-blue" data-user="role"></span><small data-user="meta"></small></p>
+          <button role="menuitem" class="menu-item" data-action="profile"><svg class="i"><use href="#i-user"/></svg>My profile</button>
+          <button role="menuitem" class="menu-item danger" data-action="logout"><svg class="i"><use href="#i-logout"/></svg>Sign out</button>
+        </div>
+      </div>
+    </div>
   </header>
-  <main>
-    <section class="welcome">
-      <p class="eyebrow">STUDENT DASHBOARD</p>
-      <h1>Good morning, Sarthak 👋</h1>
-      <p class="muted">Make today count. Your campus essentials are here.</p>
-    </section>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow" id="today">STUDENT DASHBOARD</p>
+        <h1><span id="greeting">Good morning</span>, <span data-user="first">Sarthak</span></h1>
+        <p class="muted" data-user="meta">B.Tech CSE · Semester 1 · Section A</p>
+      </div>
+      <article class="next-card" id="nextCard" aria-live="polite">
+        <div class="next-top"><span class="next-label" id="nextLabel">Up next</span><span class="next-time" id="nextTime">09:00 – 10:00</span></div>
+        <strong id="nextTitle">Engineering Mathematics</strong>
+        <span class="next-room"><svg class="i"><use href="#i-pin"/></svg><span id="nextRoom">Room 204 · Block A</span></span>
+        <div class="progress" aria-hidden="true"><span id="nextProgress" style="width:0%"></span></div>
+        <small id="nextHint">Starts at 09:00</small>
+      </article>
+    </div>
+  </section>
+
+  <main class="layout">
     <section class="quick-grid" aria-label="Quick stats">
-      <article class="stat"><span class="stat-icon">📅</span><span class="stat-label">Today's classes</span><strong>5</strong><small>Next: Engineering Maths</small></article>
-      <article class="stat"><span class="stat-icon">✅</span><span class="stat-label">Attendance</span><strong>86%</strong><small>Keep it above 75%</small></article>
-      <article class="stat"><span class="stat-icon">📝</span><span class="stat-label">Assignments</span><strong>2</strong><small>Pending this week</small></article>
-      <article class="stat"><span class="stat-icon">🔔</span><span class="stat-label">Notices</span><strong>3</strong><small>New campus updates</small></article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Attendance</span><span class="stat-icon tone-green"><svg class="i"><use href="#i-check"/></svg></span></div>
+        <div class="stat-body">
+          <svg class="ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="ring-track" cx="18" cy="18" r="15.9"/><circle class="ring-fill" cx="18" cy="18" r="15.9" pathLength="100" stroke-dasharray="86 100"/></svg>
+          <div><strong>86%</strong><small class="trend up">+2% this month</small></div>
+        </div>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Today's classes</span><span class="stat-icon tone-blue"><svg class="i"><use href="#i-calendar"/></svg></span></div>
+        <strong id="classCount">4</strong>
+        <div class="segments" id="classSegments" aria-hidden="true"></div>
+        <small id="classSummary">Next: Engineering Maths</small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Assignments</span><span class="stat-icon tone-amber"><svg class="i"><use href="#i-file"/></svg></span></div>
+        <strong>2</strong>
+        <small><span class="chip tone-amber">Due in 2 days</span></small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Notices</span><span class="stat-icon tone-pink"><svg class="i"><use href="#i-bell"/></svg></span></div>
+        <strong>3</strong>
+        <small><span class="chip tone-pink">3 unread</span></small>
+      </article>
     </section>
-    <section class="panel">
-      <div class="section-head"><div><p class="eyebrow">YOUR DAY</p><h2>Today's timetable</h2></div><span class="pill">Friday · Demo</span></div>
-      <div class="schedule" id="schedule">
-        <div class="class-row"><span class="time">09:00<br><small>10:00</small></span><span class="timeline-dot"></span><div class="class-info"><strong>Engineering Mathematics</strong><small>Room 204 · Block A</small></div><span class="subject-code">MA</span></div>
-        <div class="class-row"><span class="time">10:00<br><small>11:00</small></span><span class="timeline-dot"></span><div class="class-info"><strong>Basic Electrical Engineering</strong><small>Room 108 · Block B</small></div><span class="subject-code teal">EE</span></div>
-        <div class="class-row free"><span class="time">11:00<br><small>12:00</small></span><span class="timeline-dot"></span><div class="class-info"><strong>Free period 🎉</strong><small>Use this time to revise or relax</small></div><span class="subject-code amber">FREE</span></div>
-        <div class="class-row"><span class="time">12:00<br><small>13:00</small></span><span class="timeline-dot"></span><div class="class-info"><strong>Engineering Chemistry</strong><small>Lab 2 · Block C</small></div><span class="subject-code pink">CH</span></div>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="section-head"><div><p class="eyebrow">STAY UPDATED</p><h2>Notices & assignments</h2></div><button class="text-button" id="allNotices">View all</button></div>
-      <article class="notice"><div class="notice-symbol blue">📢</div><div><strong>Mid-semester schedule</strong><p>Check the department notice board for the updated exam plan.</p><small>Academic · Demo notice</small></div></article>
-      <article class="notice"><div class="notice-symbol orange">📌</div><div><strong>BEEE assignment due</strong><p>Submit Unit 1 questions before the next practical session.</p><small>Assignment · Demo task</small></div></article>
-      <article class="notice"><div class="notice-symbol green">🎓</div><div><strong>Student club registrations</strong><p>Explore technical and cultural clubs for this semester.</p><small>Campus life · Demo notice</small></div></article>
-    </section>
-    <section class="panel">
-      <div class="section-head"><div><p class="eyebrow">QUICK ACCESS</p><h2>Campus tools</h2></div></div>
-      <div class="tools-grid">
-        <button class="tool" data-tool="Attendance"><span>📊</span><strong>Attendance</strong><small>Track your classes</small></button>
-        <button class="tool" data-tool="Assignments"><span>📚</span><strong>Assignments</strong><small>Deadlines & tasks</small></button>
-        <button class="tool" data-tool="Faculty"><span>👨‍🏫</span><strong>Faculty</strong><small>Faculty directory demo</small></button>
-        <button class="tool" data-tool="Help desk"><span>💬</span><strong>Help desk</strong><small>Get campus support</small></button>
-      </div>
-    </section>
-    <section class="panel demo-panel"><div class="demo-badge">PROTOTYPE</div><h2>Built for a smarter campus</h2><p>This is a presentation-ready demo. Timetable, attendance, notices and student data are sample content, not connected to LNCT systems.</p><button id="installBtn" class="primary-btn" hidden>Install CampusOne</button></section>
+
+    <div class="col-main">
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">YOUR DAY</p><h2>Today's timetable</h2></div><span class="pill" id="dayPill">Today · Demo</span></div>
+        <ol class="schedule" id="schedule"></ol>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">STAY UPDATED</p><h2>Notices &amp; assignments</h2></div><button class="text-button" id="allNotices">View all <svg class="i"><use href="#i-arrow"/></svg></button></div>
+        <article class="notice unread"><div class="notice-symbol tone-blue"><svg class="i"><use href="#i-megaphone"/></svg></div><div class="notice-body"><div class="notice-title"><strong>Mid-semester schedule</strong><small>2h ago</small></div><p>Check the department notice board for the updated exam plan.</p><span class="chip tone-blue">Academic</span></div></article>
+        <article class="notice unread"><div class="notice-symbol tone-amber"><svg class="i"><use href="#i-clipboard"/></svg></div><div class="notice-body"><div class="notice-title"><strong>BEEE assignment due</strong><small>Yesterday</small></div><p>Submit Unit 1 questions before the next practical session.</p><span class="chip tone-amber">Assignment</span></div></article>
+        <article class="notice unread"><div class="notice-symbol tone-green"><svg class="i"><use href="#i-cap"/></svg></div><div class="notice-body"><div class="notice-title"><strong>Student club registrations</strong><small>2 days ago</small></div><p>Explore technical and cultural clubs for this semester.</p><span class="chip tone-green">Campus life</span></div></article>
+      </section>
+    </div>
+
+    <aside class="col-side">
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">BY SUBJECT</p><h2>Attendance</h2></div><span class="pill">Min 75%</span></div>
+        <ul class="bars">
+          <li><span>Engineering Maths</span><b>94%</b><div class="bar"><i class="tone-blue" style="width:94%"></i></div></li>
+          <li><span>Basic Electrical</span><b>90%</b><div class="bar"><i class="tone-teal" style="width:90%"></i></div></li>
+          <li><span>Engineering Chemistry</span><b>86%</b><div class="bar"><i class="tone-pink" style="width:86%"></i></div></li>
+          <li class="warn"><span>Engineering Graphics <svg class="i"><use href="#i-alert"/></svg></span><b>74%</b><div class="bar"><i style="width:74%"></i><em style="left:75%"></em></div></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">QUICK ACCESS</p><h2>Campus tools</h2></div></div>
+        <div class="tools-grid">
+          <button class="tool" data-tool="Attendance"><span class="tone-blue"><svg class="i"><use href="#i-chart"/></svg></span><strong>Attendance</strong><small>Track your classes</small></button>
+          <button class="tool" data-tool="Assignments"><span class="tone-amber"><svg class="i"><use href="#i-book"/></svg></span><strong>Assignments</strong><small>Deadlines &amp; tasks</small></button>
+          <button class="tool" data-tool="Faculty"><span class="tone-teal"><svg class="i"><use href="#i-users"/></svg></span><strong>Faculty</strong><small>Faculty directory</small></button>
+          <button class="tool" data-tool="Help desk"><span class="tone-pink"><svg class="i"><use href="#i-message"/></svg></span><strong>Help desk</strong><small>Get campus support</small></button>
+        </div>
+      </section>
+
+      <section class="panel demo-panel"><div class="demo-badge">PROTOTYPE</div><h2>Built for a smarter campus</h2><p>This is a presentation-ready demo. Timetable, attendance, notices and student data are sample content, not connected to LNCT systems.</p><button id="installBtn" class="primary-btn" hidden>Install CampusOne</button></section>
+    </aside>
   </main>
+
   <nav class="bottom-nav" aria-label="Main navigation">
-    <button class="nav-item active" data-tab="Home"><span>⌂</span><small>Home</small></button>
-    <button class="nav-item" data-tab="Timetable"><span>▦</span><small>Timetable</small></button>
-    <button class="nav-item" data-tab="Tasks"><span>✓</span><small>Tasks</small></button>
-    <button class="nav-item" data-tab="Profile"><span>◉</span><small>Profile</small></button>
+    <button class="nav-item active" data-tab="Home" data-home aria-current="page"><svg class="i"><use href="#i-home"/></svg><small>Home</small></button>
+    <button class="nav-item" data-tab="Timetable"><svg class="i"><use href="#i-calendar"/></svg><small>Timetable</small></button>
+    <button class="nav-item" data-tab="Tasks"><svg class="i"><use href="#i-tasks"/></svg><small>Tasks</small></button>
+    <button class="nav-item" data-tab="Profile"><svg class="i"><use href="#i-user"/></svg><small>Profile</small></button>
   </nav>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    window.SCHEDULE = [
+      {start:"09:00",end:"10:00",title:"Engineering Mathematics",place:"Room 204 · Block A",code:"MA",tone:"blue"},
+      {start:"10:00",end:"11:00",title:"Basic Electrical Engineering",place:"Room 108 · Block B",code:"EE",tone:"teal"},
+      {start:"11:00",end:"12:00",title:"Free period",place:"Use this time to revise or relax",code:"FREE",tone:"amber",free:true},
+      {start:"12:00",end:"13:00",title:"Engineering Chemistry",place:"Lab 2 · Block C",code:"CH",tone:"pink"},
+      {start:"14:00",end:"16:00",title:"Engineering Graphics",place:"Drawing Hall · Block D",code:"EG",tone:"green"}
+    ];
+  </script>
   <script src="./app.js" defer></script>
+  <script src="./timetable.js" defer></script>
 </body>
 </html>

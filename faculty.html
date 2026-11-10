@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-role="faculty">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123c8c">
+  <meta name="description" content="LNCT CampusOne faculty dashboard prototype">
+  <title>Faculty · CampusOne</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./auth.js"></script>
+</head>
+<body>
+  <script src="./icons.js"></script>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-mark" aria-hidden="true">L<span>1</span></div>
+      <div class="brand-copy"><strong>LNCT CampusOne</strong><small>Faculty workspace</small></div>
+      <button class="icon-btn" id="bellBtn" aria-label="Notifications, 3 new"><svg class="i"><use href="#i-bell"/></svg><span class="dot"></span></button>
+      <div class="profile">
+        <button class="avatar" id="profileBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="profileMenu" aria-label="Account menu"><span data-user="initials"></span></button>
+        <div class="profile-menu" id="profileMenu" role="menu" hidden>
+          <div class="profile-head"><span class="avatar sm" data-user="initials"></span><div><strong data-user="name"></strong><small data-user="id"></small></div></div>
+          <p class="profile-meta"><span class="chip tone-teal" data-user="role"></span><small data-user="meta"></small></p>
+          <button role="menuitem" class="menu-item" data-action="profile"><svg class="i"><use href="#i-user"/></svg>My profile</button>
+          <button role="menuitem" class="menu-item danger" data-action="logout"><svg class="i"><use href="#i-logout"/></svg>Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow" id="today">FACULTY DASHBOARD</p>
+        <h1><span id="greeting">Good morning</span>, <span data-user="first"></span></h1>
+        <p class="muted" data-user="meta"></p>
+      </div>
+      <article class="next-card" id="nextCard" aria-live="polite">
+        <div class="next-top"><span class="next-label" id="nextLabel">Up next</span><span class="next-time" id="nextTime"></span></div>
+        <strong id="nextTitle"></strong>
+        <span class="next-room"><svg class="i"><use href="#i-pin"/></svg><span id="nextRoom"></span></span>
+        <div class="progress" aria-hidden="true"><span id="nextProgress" style="width:0%"></span></div>
+        <small id="nextHint"></small>
+      </article>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="quick-grid" aria-label="Quick stats">
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Lectures today</span><span class="stat-icon tone-blue"><svg class="i"><use href="#i-calendar"/></svg></span></div>
+        <strong id="classCount">3</strong>
+        <div class="segments" id="classSegments" aria-hidden="true"></div>
+        <small id="classSummary"></small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">My students</span><span class="stat-icon tone-teal"><svg class="i"><use href="#i-users"/></svg></span></div>
+        <strong>186</strong>
+        <small>Across 3 sections</small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Attendance to mark</span><span class="stat-icon tone-amber"><svg class="i"><use href="#i-check"/></svg></span></div>
+        <strong id="pendingCount">2</strong>
+        <small><span class="chip tone-amber" id="pendingChip">2 classes pending</span></small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">To review</span><span class="stat-icon tone-pink"><svg class="i"><use href="#i-file"/></svg></span></div>
+        <strong id="reviewCount">24</strong>
+        <small><span class="chip tone-pink">Submissions waiting</span></small>
+      </article>
+    </section>
+
+    <div class="col-main">
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">YOUR DAY</p><h2>Teaching schedule</h2></div><span class="pill" id="dayPill">Today · Demo</span></div>
+        <ol class="schedule" id="schedule"></ol>
+      </section>
+
+      <section class="panel" id="attendancePanel">
+        <div class="section-head"><div><p class="eyebrow">QUICK ACTION</p><h2>Mark attendance</h2></div>
+          <div class="seg" role="group" aria-label="Section">
+            <button type="button" data-section="CSE-A" aria-pressed="true">CSE-A</button>
+            <button type="button" data-section="CSE-B" aria-pressed="false">CSE-B</button>
+          </div>
+        </div>
+        <p class="panel-sub" id="rosterSub">Engineering Mathematics · 09:00 · Tap a student to toggle.</p>
+        <ul class="roster" id="roster"></ul>
+        <div class="roster-foot">
+          <div><strong id="presentCount">0 / 0 present</strong><small id="rosterState">Not submitted yet</small></div>
+          <div style="display:flex;gap:8px"><button type="button" class="btn-sm" id="markAll">Mark all present</button><button type="button" class="btn-sm primary" id="submitAttendance">Submit attendance</button></div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="col-side">
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">ASSIGNMENTS</p><h2>Submissions</h2></div><span class="pill" id="reviewPill">24 to review</span></div>
+        <ul class="review-list" id="reviews"></ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">ANNOUNCE</p><h2>Post a notice</h2></div></div>
+        <form class="compose" id="noticeForm">
+          <label class="sr-only" for="noticeText">Notice</label>
+          <textarea id="noticeText" maxlength="280" placeholder="e.g. Unit 2 quiz moved to Thursday, 10:00 in Room 204." required></textarea>
+          <div class="compose-row">
+            <label class="sr-only" for="noticeAudience">Audience</label>
+            <select id="noticeAudience"><option>CSE-A</option><option>CSE-B</option><option>All my sections</option></select>
+            <button class="btn-sm primary" type="submit"><span style="display:inline-flex;align-items:center;gap:6px"><svg class="i" style="width:15px;height:15px"><use href="#i-send"/></svg>Post</span></button>
+          </div>
+        </form>
+        <ul class="posted" id="posted">
+          <li><p>Bring graph sheets for tomorrow's tutorial on curve tracing.</p><span class="meta"><span class="chip tone-teal">CSE-B</span>Yesterday</span></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">QUICK ACCESS</p><h2>Faculty tools</h2></div></div>
+        <div class="tools-grid">
+          <button class="tool" data-tool="Gradebook"><span class="tone-blue"><svg class="i"><use href="#i-chart"/></svg></span><strong>Gradebook</strong><small>Marks &amp; internals</small></button>
+          <button class="tool" data-tool="Question bank"><span class="tone-amber"><svg class="i"><use href="#i-book"/></svg></span><strong>Question bank</strong><small>Papers &amp; quizzes</small></button>
+          <button class="tool" data-tool="Leave request"><span class="tone-teal"><svg class="i"><use href="#i-calendar"/></svg></span><strong>Leave request</strong><small>Apply &amp; track</small></button>
+          <button class="tool" data-tool="Help desk"><span class="tone-pink"><svg class="i"><use href="#i-message"/></svg></span><strong>Help desk</strong><small>IT &amp; admin support</small></button>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-item active" data-tab="Home" data-home aria-current="page"><svg class="i"><use href="#i-home"/></svg><small>Home</small></button>
+    <button class="nav-item" data-tab="Classes"><svg class="i"><use href="#i-calendar"/></svg><small>Classes</small></button>
+    <button class="nav-item" data-tab="Attendance"><svg class="i"><use href="#i-tasks"/></svg><small>Attendance</small></button>
+    <button class="nav-item" data-tab="Profile"><svg class="i"><use href="#i-user"/></svg><small>Profile</small></button>
+  </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    window.SCHEDULE = [
+      {start:"09:00",end:"10:00",title:"Engineering Mathematics · CSE-A",place:"Room 204 · Block A",code:"MA",tone:"blue"},
+      {start:"10:00",end:"11:00",title:"Office hours",place:"Cabin M-12 · Block A",code:"OH",tone:"amber",free:true},
+      {start:"11:00",end:"12:00",title:"Engineering Mathematics · CSE-B",place:"Room 210 · Block A",code:"MA",tone:"teal"},
+      {start:"12:00",end:"13:00",title:"Department meeting",place:"Conference Room · Block A",code:"MTG",tone:"amber",free:true},
+      {start:"14:00",end:"15:00",title:"Discrete Structures · CSE-A",place:"Room 305 · Block C",code:"DS",tone:"pink"}
+    ];
+  </script>
+  <script src="./app.js" defer></script>
+  <script src="./timetable.js" defer></script>
+  <script src="./faculty.js" defer></script>
+</body>
+</html>
