@@ -9,9 +9,9 @@
 -- =====================================================================
 do $$
 declare
-  v_student_email text := 'student@example.com';   -- <-- change
-  v_faculty_email text := 'faculty@example.com';   -- <-- change
-  v_admin_email   text := 'admin@example.com';     -- <-- change
+  v_student_email text := 'student@lnct.com';   -- <-- change
+  v_faculty_email text := 'faculty@lnct.com';   -- <-- change
+  v_admin_email   text := 'admin@lnct.com';     -- <-- change
 
   v_student uuid; v_faculty uuid; v_admin uuid;
   c_ma bigint; c_ee bigint; c_ch bigint; c_eg bigint;

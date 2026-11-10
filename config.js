@@ -10,6 +10,6 @@
  * NEVER put the "service_role" or "secret" key here.
  */
 window.CAMPUSONE_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: ""
+  supabaseUrl: "https://cdbilhwxbvngzsretykp.supabase.co",
+  supabaseAnonKey: "sb_publishable_7FZZUCjaOHSM7ZVKj-G_fA_lAV6St8t"
 };
