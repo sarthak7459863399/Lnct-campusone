@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en" data-role="admin">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123c8c">
+  <meta name="description" content="LNCT CampusOne admin console prototype">
+  <title>Admin · CampusOne</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./auth.js"></script>
+</head>
+<body>
+  <script src="./icons.js"></script>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-mark" aria-hidden="true">L<span>1</span></div>
+      <div class="brand-copy"><strong>LNCT CampusOne</strong><small>Admin console</small></div>
+      <button class="icon-btn" id="bellBtn" aria-label="Notifications"><svg class="i"><use href="#i-bell"/></svg><span class="dot"></span></button>
+      <div class="profile">
+        <button class="avatar" id="profileBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="profileMenu" aria-label="Account menu"><span data-user="initials"></span></button>
+        <div class="profile-menu" id="profileMenu" role="menu" hidden>
+          <div class="profile-head"><span class="avatar sm" data-user="initials"></span><div><strong data-user="name"></strong><small data-user="id"></small></div></div>
+          <p class="profile-meta"><span class="chip tone-amber" data-user="role"></span><small data-user="meta"></small></p>
+          <button role="menuitem" class="menu-item" data-action="profile"><svg class="i"><use href="#i-user"/></svg>My profile</button>
+          <button role="menuitem" class="menu-item danger" data-action="logout"><svg class="i"><use href="#i-logout"/></svg>Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow" id="today">ADMIN CONSOLE</p>
+        <h1><span id="greeting">Good morning</span>, <span data-user="first"></span></h1>
+        <p class="muted">Here's how the campus is doing today.</p>
+      </div>
+      <article class="next-card live">
+        <div class="next-top"><span class="next-label">All systems normal</span><span class="next-time">Updated just now</span></div>
+        <div class="health">
+          <div class="health-row"><span>Active sessions</span><b>1,284</b></div>
+          <div class="health-row"><span>Sign-ins today</span><b>3,912</b></div>
+          <div class="health-row"><span>Pending approvals</span><b id="pendingHero">3</b></div>
+          <div class="health-row"><span>Uptime (30 days)</span><b>99.98%</b></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="quick-grid" aria-label="Campus stats">
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Students</span><span class="stat-icon tone-blue"><svg class="i"><use href="#i-cap"/></svg></span></div>
+        <strong>4,820</strong>
+        <small class="trend up">+120 this semester</small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Faculty</span><span class="stat-icon tone-teal"><svg class="i"><use href="#i-users"/></svg></span></div>
+        <strong>312</strong>
+        <small>Across 8 departments</small>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Avg attendance</span><span class="stat-icon tone-green"><svg class="i"><use href="#i-check"/></svg></span></div>
+        <div class="stat-body">
+          <svg class="ring" viewBox="0 0 36 36" aria-hidden="true"><circle class="ring-track" cx="18" cy="18" r="15.9"/><circle class="ring-fill" cx="18" cy="18" r="15.9" pathLength="100" stroke-dasharray="84 100"/></svg>
+          <div><strong>84%</strong><small>Campus-wide</small></div>
+        </div>
+      </article>
+      <article class="stat">
+        <div class="stat-head"><span class="stat-label">Pending approvals</span><span class="stat-icon tone-amber"><svg class="i"><use href="#i-shield"/></svg></span></div>
+        <strong id="pendingCount">3</strong>
+        <small><span class="chip tone-amber" id="pendingChip">New accounts</span></small>
+      </article>
+    </section>
+
+    <div class="col-main">
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">PEOPLE</p><h2>User management</h2></div><button class="btn-sm primary" type="button" data-tool="Add user"><span style="display:inline-flex;align-items:center;gap:6px"><svg class="i" style="width:15px;height:15px"><use href="#i-plus"/></svg>Add user</span></button></div>
+        <div class="toolbar">
+          <div class="input-wrap"><svg class="i"><use href="#i-search"/></svg><label class="sr-only" for="userSearch">Search users</label><input id="userSearch" type="search" placeholder="Search name, ID or department"></div>
+          <div class="seg" role="group" aria-label="Filter by role">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="student" aria-pressed="false">Students</button>
+            <button type="button" data-filter="faculty" aria-pressed="false">Faculty</button>
+            <button type="button" data-filter="pending" aria-pressed="false">Pending</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>User</th><th>Role</th><th>Department</th><th>Status</th><th><span class="sr-only">Action</span></th></tr></thead>
+            <tbody id="userRows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="noUsers" hidden>No users match your search.</p>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">BY DEPARTMENT</p><h2>Attendance this month</h2></div><span class="pill">Min 75%</span></div>
+        <ul class="bars">
+          <li><span>Computer Science</span><b>88%</b><div class="bar"><i class="tone-blue" style="width:88%"></i></div></li>
+          <li><span>Information Technology</span><b>86%</b><div class="bar"><i class="tone-teal" style="width:86%"></i></div></li>
+          <li><span>Electronics &amp; Comm.</span><b>83%</b><div class="bar"><i class="tone-pink" style="width:83%"></i></div></li>
+          <li><span>Mechanical</span><b>81%</b><div class="bar"><i class="tone-green" style="width:81%"></i></div></li>
+          <li class="warn"><span>Civil <svg class="i"><use href="#i-alert"/></svg></span><b>74%</b><div class="bar"><i style="width:74%"></i><em style="left:75%"></em></div></li>
+        </ul>
+      </section>
+    </div>
+
+    <aside class="col-side">
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">BROADCAST</p><h2>Publish campus notice</h2></div></div>
+        <form class="compose" id="noticeForm">
+          <label class="sr-only" for="noticeText">Notice</label>
+          <textarea id="noticeText" maxlength="280" placeholder="e.g. Campus closed on Friday for Foundation Day." required></textarea>
+          <div class="compose-row">
+            <label class="sr-only" for="noticeAudience">Audience</label>
+            <select id="noticeAudience"><option>Everyone</option><option>All students</option><option>All faculty</option></select>
+            <button class="btn-sm primary" type="submit"><span style="display:inline-flex;align-items:center;gap:6px"><svg class="i" style="width:15px;height:15px"><use href="#i-send"/></svg>Publish</span></button>
+          </div>
+        </form>
+        <ul class="posted" id="posted">
+          <li><p>Mid-semester exam schedule published on the notice board.</p><span class="meta"><span class="chip tone-blue">All students</span>2h ago</span></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">AUDIT LOG</p><h2>Recent activity</h2></div></div>
+        <ul class="feed" id="feed">
+          <li><span class="dot-ic tone-blue"><svg class="i"><use href="#i-user"/></svg></span><div><p><b>Prof. Neha Verma</b> submitted attendance for CSE-A</p><small>12 min ago</small></div></li>
+          <li><span class="dot-ic tone-amber"><svg class="i"><use href="#i-shield"/></svg></span><div><p>3 new student accounts awaiting approval</p><small>40 min ago</small></div></li>
+          <li><span class="dot-ic tone-teal"><svg class="i"><use href="#i-megaphone"/></svg></span><div><p>Notice published to <b>All students</b></p><small>2h ago</small></div></li>
+          <li><span class="dot-ic tone-pink"><svg class="i"><use href="#i-activity"/></svg></span><div><p>Nightly backup completed</p><small>Today, 02:00</small></div></li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <div class="section-head"><div><p class="eyebrow">MANAGE</p><h2>Admin tools</h2></div></div>
+        <div class="tools-grid">
+          <button class="tool" data-tool="Departments"><span class="tone-blue"><svg class="i"><use href="#i-building"/></svg></span><strong>Departments</strong><small>Courses &amp; sections</small></button>
+          <button class="tool" data-tool="Reports"><span class="tone-teal"><svg class="i"><use href="#i-chart"/></svg></span><strong>Reports</strong><small>Attendance &amp; results</small></button>
+          <button class="tool" data-tool="Roles & permissions"><span class="tone-amber"><svg class="i"><use href="#i-shield"/></svg></span><strong>Roles</strong><small>Access &amp; permissions</small></button>
+          <button class="tool" data-tool="Settings"><span class="tone-pink"><svg class="i"><use href="#i-sliders"/></svg></span><strong>Settings</strong><small>Academic calendar</small></button>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-item active" data-tab="Overview" data-home aria-current="page"><svg class="i"><use href="#i-home"/></svg><small>Overview</small></button>
+    <button class="nav-item" data-tab="Users"><svg class="i"><use href="#i-users"/></svg><small>Users</small></button>
+    <button class="nav-item" data-tab="Notices"><svg class="i"><use href="#i-megaphone"/></svg><small>Notices</small></button>
+    <button class="nav-item" data-tab="Profile"><svg class="i"><use href="#i-user"/></svg><small>Profile</small></button>
+  </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+  <script src="./admin.js" defer></script>
+</body>
+</html>

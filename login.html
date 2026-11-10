@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" data-role="guest">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#123c8c">
+  <meta name="description" content="Sign in to LNCT CampusOne as a student, faculty member or administrator">
+  <title>Sign in · CampusOne</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./auth.js"></script>
+</head>
+<body class="login-page">
+  <script src="./icons.js"></script>
+  <main class="login">
+    <section class="login-brand">
+      <div class="login-brand-inner">
+        <div class="login-logo"><div class="brand-mark" aria-hidden="true">L<span>1</span></div><div><strong>LNCT CampusOne</strong><small>Your campus, one place</small></div></div>
+        <div class="login-pitch">
+          <h1>One sign-in for your whole campus.</h1>
+          <p>Timetables, attendance, notices and assignments, with the right view for every role.</p>
+          <ul class="login-features">
+            <li><span class="tone-blue"><svg class="i"><use href="#i-cap"/></svg></span><div><strong>Students</strong><small>Live timetable, attendance and deadlines</small></div></li>
+            <li><span class="tone-teal"><svg class="i"><use href="#i-users"/></svg></span><div><strong>Faculty</strong><small>Mark attendance, review work, post notices</small></div></li>
+            <li><span class="tone-amber"><svg class="i"><use href="#i-shield"/></svg></span><div><strong>Admin</strong><small>Manage users, departments and campus updates</small></div></li>
+          </ul>
+        </div>
+        <small class="login-note">Prototype · sample data only</small>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <form class="login-card" id="loginForm" novalidate>
+        <h2>Welcome back</h2>
+        <p class="login-sub">Choose your role and sign in to continue.</p>
+
+        <fieldset class="roles">
+          <legend class="sr-only">Sign in as</legend>
+          <label><input type="radio" name="role" value="student" checked><span><svg class="i"><use href="#i-cap"/></svg>Student</span></label>
+          <label><input type="radio" name="role" value="faculty"><span><svg class="i"><use href="#i-users"/></svg>Faculty</span></label>
+          <label><input type="radio" name="role" value="admin"><span><svg class="i"><use href="#i-shield"/></svg>Admin</span></label>
+        </fieldset>
+
+        <div class="field">
+          <label for="userId" id="idLabel">Enrollment number</label>
+          <div class="input-wrap"><svg class="i"><use href="#i-user"/></svg><input id="userId" name="username" autocomplete="username" autocapitalize="characters" spellcheck="false" required placeholder="e.g. 0103CS241001"></div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap"><svg class="i"><use href="#i-lock"/></svg><input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Enter your password">
+            <button type="button" class="pw-toggle" id="togglePw" aria-label="Show password" aria-pressed="false"><svg class="i"><use href="#i-eye"/></svg></button></div>
+        </div>
+
+        <div class="login-row">
+          <label class="check"><input type="checkbox" id="remember"><span>Keep me signed in</span></label>
+          <button type="button" class="text-button" id="forgot">Forgot password?</button>
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden><svg class="i"><use href="#i-alert"/></svg><span></span></p>
+
+        <button class="primary-btn block" type="submit" id="submitBtn"><span>Sign in</span><svg class="i"><use href="#i-arrow"/></svg></button>
+
+        <div class="demo-creds">
+          <div><strong>Demo <span id="demoRole">student</span> account</strong><small><code id="demoId"></code> · <code id="demoPw"></code></small></div>
+          <button type="button" class="text-button" id="useDemo">Fill in</button>
+        </div>
+      </form>
+      <p class="login-foot">Not connected to LNCT systems. For demonstration only.</p>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./login.js" defer></script>
+</body>
+</html>
