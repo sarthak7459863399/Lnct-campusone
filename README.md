@@ -15,13 +15,15 @@ Follow [`supabase/SETUP.md`](supabase/SETUP.md): run `schema.sql`, create the fi
 - `supabase/schema.sql` — tables, security rules and database functions
 - `supabase/seed.sql` — first accounts' roles plus sample timetable, notices, assignments and attendance
 - `supabase/SETUP.md` — step-by-step setup
+- `supabase/functions/admin-users/index.ts` — Edge Function that lets admins create, re-password and delete accounts
+- `supabase/migrations/002_admin_accounts.sql` — update for projects set up before account management was added
 - `config.js` — your Supabase Project URL and anon key
 - `auth.js` — Supabase client, sign-in/out and the per-page role guard
 - `login.html`, `login.js` — role-based sign-in page
 - `reset.html`, `reset.js` — set a new password from the reset email
 - `index.html`, `student.js` — student dashboard (timetable, attendance, notices, assignments)
 - `faculty.html`, `faculty.js` — faculty dashboard (attendance marking, assignments, notices)
-- `admin.html`, `admin.js` — admin console (approvals, roles, notices, activity log)
+- `admin.html`, `admin.js` — admin console (add/edit/delete accounts, approvals, notices, activity log)
 - `timetable.js` — live timetable used by the student and faculty pages
 - `app.js` — shared header, account menu, helpers, navigation, install prompt
 - `icons.js` — shared SVG icons
